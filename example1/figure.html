@@ -4,25 +4,44 @@
 <script id="vertex-shader" type="x-shader/x-vertex">
 
 attribute  vec4 vPosition;
+attribute  vec2 vTexCoord;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+varying vec2 fTexCoord;
 
 
 void main()
 {
     gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    fTexCoord = vTexCoord;
 }
 </script>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
 
 precision mediump float;
+uniform int u_useTexture;
 uniform vec4 u_color;
+varying  vec2 fTexCoord;
+
+uniform sampler2D texture;
+uniform sampler2D texture2;
 
 void main()
 {
-    gl_FragColor = u_color;
+    if (u_useTexture == 1) {
+        gl_FragColor = texture2D( texture, fTexCoord );
+    }
+    else if(u_useTexture == 2){
+        gl_FragColor = texture2D( texture2, fTexCoord );
+    }
+    else {
+        gl_FragColor = u_color;
+    }
+    //gl_FragColor = u_color;
+    //gl_FragColor = texture2D( texture, fTexCoord );
+    //gl_FragColor = u_color*texture2D( texture, fTexCoord );
 
 }
 </script>
@@ -42,15 +61,15 @@ void main()
 <script type="text/javascript" src="figure.js"></script>
 
 
-
 <body>
 <canvas id="gl-canvas" width="700" height="700">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
 <div>
-    <input id="slider1" type="range"
-     min="-180" max="180" step="10" value="0"
-      />
+<button id="cammera1">시점1</button>
+<button id="cammera2">시점2</button>
+<button id="dino1">모델1</button>
+<button id="dino2">모델2</button>
 </div><br/>
 </body>
 </html>
