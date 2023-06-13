@@ -371,13 +371,13 @@ var offset = 0.0; // 초기 오프셋
 
 var dinoTexture = new Image();
 dinoTexture.crossOrigin = "anonymous";
-dinoTexture.src = "https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg";
+dinoTexture.src = "https://upload.wikimedia.org/wikipedia/commons/0/0c/Development_test_%28Minetest%29_texture_default_grass.png";
 dinoTexture.height = 256;
 dinoTexture.width = 256;
 
 var brachioTexture = new Image();
 brachioTexture.crossOrigin = "anonymous";
-brachioTexture.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Komodo_dragon_skin.jpg/1600px-Komodo_dragon_skin.jpg?20050518191042"
+brachioTexture.src = "https://static.turbosquid.com/Preview/2014/08/01__12_04_02/dino256.jpg1DF84D8F-C361-4320-812A266C013E0539.jpgDefaultHQ.jpg"
 
 var groundTexture = new Image();
 groundTexture.crossOrigin = "anonymous";
@@ -824,7 +824,7 @@ function initNodes(Id) {
     case leftUpperArmId:
 
     m = translate(-0.3*neck2Width, 0, 1.4*upperArmHeight);
-	m = mult(m, rotate(theta[leftUpperArmId], 1, 0, 0));
+	  m = mult(m, rotate(theta[leftUpperArmId], 1, 0, 0));
     figure[leftUpperArmId] = createNode( m, leftUpperArm, rightUpperArmId, leftLowerArmId );
     break;
 
@@ -1006,11 +1006,14 @@ function traverse(Id) {
     if (Id == null) return; // 만약 Id가 null이면 함수 종료
     stack.push(modelViewMatrix); // 스택에 modelViewMatrix를 push
     modelViewMatrix = mult(modelViewMatrix, figure[Id].transform); // modelViewMatrix를 현재 transform과 곱함
-    if (Id < dinoNodes+moleNodes+birdNodes && Id != mole_grassId) {
+    if (Id >= dinoNodes && Id < dinoNodes+moleNodes+birdNodes && Id != mole_grassId || Id == eyeId) {
         gl.uniform1i(useTextureLocation, 0);
     }
+    else if(Id < dinoNodes){
+      gl.uniform1i(useTextureLocation, 1);
+    }
     else if(Id >= 60 && Id < 60 + brachioNodes){
-        gl.uniform1i(useTextureLocation, 0);
+        gl.uniform1i(useTextureLocation, 1);
     }
     else{
         gl.uniform1i(useTextureLocation, 1);
@@ -1025,356 +1028,361 @@ function ground(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0) );
     instanceMatrix = mult(instanceMatrix, scale4(3*groundWidth, groundHeight, 0.9*groundWidth));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    setTexture(groundTexture);
     for(var i =0; i<6; i++) {
-        setTexture(groundTexture);
         gl.uniform4fv(colorLocation, objectColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        disableTexture();
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    disableTexture();
+    for(var i =0; i<6; i++) {
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  }
 }
 
 function brachio_torso(){
+  setTexture(brachioTexture);
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_torsoX, brachio_torsoY, brachio_torsoZ));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
-    gl.uniform4fv(colorLocation, lineColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
     gl.uniform4fv(colorLocation, bodyColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
+    gl.uniform4fv(colorLocation, lineColor);
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
   }
   function brachio_body1(){
+    setTexture(brachioTexture);
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_body1X, brachio_brachio_body1Y, brachio_brachio_body1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_body3(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_body3X, brachio_brachio_body3Y, brachio_brachio_body3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_neck1(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_neckX, brachio_neckY, brachio_neckZ));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_neck2(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_neckX, brachio_neckY, brachio_neckZ));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_neck3(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_neckX, brachio_neckY, brachio_neckZ));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_neck4(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_neckX, brachio_neckY, brachio_neckZ));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_neck5(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_neckX, brachio_neckY, brachio_neckZ));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_head1(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_head1X, brachio_brachio_head1Y, brachio_brachio_head1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_head2(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_head2X, brachio_brachio_head2Y, brachio_brachio_head2Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_body2(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_body2X, brachio_brachio_body2Y, brachio_brachio_body2Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_brLeg1(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg1X, brachio_leg1Y, brachio_leg1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_brLeg2(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg1X, brachio_leg1Y, brachio_leg1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_brLeg3(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg3X, brachio_leg3Y, brachio_leg3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_blLeg1(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg1X, brachio_leg1Y, brachio_leg1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_blLeg2(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg1X, brachio_leg1Y, brachio_leg1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_blLeg3(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg3X, brachio_leg3Y, brachio_leg3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_frLeg1(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg1X, brachio_leg1Y, brachio_leg1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_frLeg2(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg1X, brachio_leg1Y, brachio_leg1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_frLeg3(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg3X, brachio_leg3Y, brachio_leg3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_flLeg1(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg1X, brachio_leg1Y, brachio_leg1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_flLeg2(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg1X, brachio_leg1Y, brachio_leg1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_flLeg3(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_leg3X, brachio_leg3Y, brachio_leg3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail1(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail1X, brachio_brachio_tail1Y, brachio_brachio_tail1Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail2(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail2X, brachio_brachio_tail2Y, brachio_brachio_tail2Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail3(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail2X, brachio_brachio_tail2Y, brachio_brachio_tail2Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail4(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail3X, brachio_brachio_tail3Y, brachio_brachio_tail3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail5(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail3X, brachio_brachio_tail3Y, brachio_brachio_tail3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail6(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail3X, brachio_brachio_tail3Y, brachio_brachio_tail3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail7(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail3X, brachio_brachio_tail3Y, brachio_brachio_tail3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail8(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail3X, brachio_brachio_tail3Y, brachio_brachio_tail3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail9(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail3X, brachio_brachio_tail3Y, brachio_brachio_tail3Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail10(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail4X, brachio_brachio_tail4Y, brachio_brachio_tail4Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail11(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail4X, brachio_brachio_tail4Y, brachio_brachio_tail4Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail12(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail4X, brachio_brachio_tail4Y, brachio_brachio_tail4Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail13(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail4X, brachio_brachio_tail4Y, brachio_brachio_tail4Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail14(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail5X, brachio_brachio_tail5Y, brachio_brachio_tail5Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
   function brachio_tail15(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(brachio_brachio_tail5X, brachio_brachio_tail5Y, brachio_brachio_tail5Z));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
     gl.uniform4fv(colorLocation, lineColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
-    gl.uniform4fv(colorLocation, bodyColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
   }
 function mole_head1(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
@@ -1462,25 +1470,28 @@ function mole_head1(){
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
     instanceMatrix = mult(instanceMatrix, scale4(grassX, grassY, grassZ));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
-    gl.uniform4fv(colorLocation, mole_lineColor);
-    for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
     setTexture(groundTexture);
     gl.uniform4fv(colorLocation, mole_grassColor);
     for (var i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
+    gl.uniform1i(useTextureLocation, 0);
+    gl.uniform4fv(colorLocation, mole_lineColor);
+    for (var i = 0; i < 6; i++) gl.drawArrays(gl.LINE_LOOP, 4 * i, 4);
   }
   
 
 function torso() {
-
     instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.5*torsoHeight, 0.0) );
     instanceMatrix = mult(instanceMatrix, scale4( torsoXWidth, torsoHeight, torsoWidth));
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function torso2() {
@@ -1490,9 +1501,12 @@ function torso2() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function head() {
@@ -1502,9 +1516,12 @@ function head() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function eye() {
@@ -1514,8 +1531,7 @@ function eye() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, eyeColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+
     }
 }
 
@@ -1526,9 +1542,12 @@ function neck() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function neck2() {
@@ -1538,9 +1557,12 @@ function neck2() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function mouth() {
@@ -1550,9 +1572,12 @@ function mouth() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function mouth2() {
@@ -1562,9 +1587,12 @@ function mouth2() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function leftUpperArm() {
@@ -1575,9 +1603,12 @@ function leftUpperArm() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function leftLowerArm() {
@@ -1588,9 +1619,12 @@ function leftLowerArm() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function rightUpperArm() {
@@ -1601,9 +1635,12 @@ function rightUpperArm() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function rightLowerArm() {
@@ -1614,9 +1651,12 @@ function rightLowerArm() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function leftUpperLeg() {
@@ -1627,9 +1667,12 @@ function leftUpperLeg() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function leftmiddleLeg() {
@@ -1640,9 +1683,12 @@ function leftmiddleLeg() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function leftLowerLeg() {
@@ -1653,9 +1699,12 @@ function leftLowerLeg() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function rightUpperLeg() {
@@ -1666,9 +1715,12 @@ function rightUpperLeg() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function rightmiddleLeg() {
@@ -1679,9 +1731,12 @@ function rightmiddleLeg() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function rightLowerLeg() {
@@ -1692,9 +1747,12 @@ function rightLowerLeg() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function tail() {
@@ -1704,9 +1762,12 @@ function tail() {
     for(var i =0; i<6; i++) {
         gl.uniform4fv(colorLocation, bodyColor);
         gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
     }
+    gl.uniform1i(useTextureLocation, 0);
+    for(var i =0; i<6; i++) {
+      gl.uniform4fv(colorLocation, lineColor);
+      gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+  } 
 }
 
 function tail2() {
@@ -1714,11 +1775,14 @@ function tail2() {
 	instanceMatrix = mult(instanceMatrix, scale4(tail2Width, tail2Height, tail2Width) )
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
     for(var i =0; i<6; i++) {
-        gl.uniform4fv(colorLocation, bodyColor);
-        gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-        gl.uniform4fv(colorLocation, lineColor);
-        gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
-    }
+      gl.uniform4fv(colorLocation, bodyColor);
+      gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
+  }
+  gl.uniform1i(useTextureLocation, 0);
+  for(var i =0; i<6; i++) {
+    gl.uniform4fv(colorLocation, lineColor);
+    gl.drawArrays(gl.LINE_LOOP, 4*i, 4);
+} 
 }
 
 function bird_torso(){
@@ -2115,10 +2179,12 @@ var render1_tirano = function() { //dino
     if(stopRendering) return;
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
     if(dinoNum == 0){
+      setTexture(dinoTexture);
         traverse(torsoId);
         dinoRun();
     }
     else{
+      setTexture(brachioTexture);
         motionLegPlus(brachio_brachio_flLeg1Id);
         motionLegPlus(brachio_brachio_flLeg2Id);
         motionLegPlus(brachio_brachio_flLeg3Id);
@@ -2166,6 +2232,7 @@ var render1_tirano = function() { //dino
 }
 
 var render2 = function() {  //mole
+  setTexture(groundTexture);
     if(stopRendering) return;
     traverse(mole_head1Id);
     moleRun();
@@ -2173,6 +2240,7 @@ var render2 = function() {  //mole
 }
 
 var render3 = function() { //ground
+  setTexture(groundTexture);
     if(stopRendering) return;
     traverse(groundId);
     moveGround();
